@@ -30,6 +30,6 @@ document.getElementById('order-form').addEventListener('submit', function(event)
     // Reset the form
     this.reset();
     
-    // Hide the checkout section again
+    
     document.getElementById('checkout').classList.add('hidden');
 })
