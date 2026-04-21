@@ -32,4 +32,4 @@ document.getElementById('order-form').addEventListener('submit', function(event)
     
     // Hide the checkout section again
     document.getElementById('checkout').classList.add('hidden');
-});
+})
