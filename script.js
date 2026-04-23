@@ -1,6 +1,6 @@
 // Function to open the checkout section and populate the selected product
 function openCheckout(productName, price) {
-    const checkoutSection  document.getElementById('checkout');
+    const checkoutSection = document.getElementById('checkout');
     const orderSummary = document.querySelector('#order-summary span');
     
     // Unhide the checkout section
