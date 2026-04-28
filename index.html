@@ -3,87 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Handcraft Haven</title>
+    <title>Artisan Home & Decor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header>
-        <div class="logo">Handcraft Haven</div>
-        <nav>
-            <a href="#products">Products</a>
-            <a href="#contact">Contact</a>
-        </nav>
+        <div class="logo">Artisan Decor</div>
+        <button id="cart-btn" class="cart-btn">
+            Cart (<span id="cart-count">0</span>)
+        </button>
     </header>
 
     <section class="hero">
-        <h1>Unique Handcrafted Treasures</h1>
-        <p>Made with love, delivered to your doorstep.</p>
+        <h1>Handcrafted Warmth for Your Home</h1>
+        <p>Discover unique, handmade decor pieces that bring life to your spaces.</p>
     </section>
 
-    <section id="products" class="products">
-        <h2>Our Collection</h2>
-        <div class="product-grid">
-            <div class="product-card">
-                <img src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=300&q=80" alt="Ceramic Vase">
-                <h3>Handmade Ceramic Vase</h3>
-                <p>₹850</p>
-                <button class="buy-btn" onclick="openCheckout('Handmade Ceramic Vase', 850)">Buy Now</button>
+    <main>
+        <div class="product-grid" id="product-grid">
             </div>
-            <div class="product-card">
-                <img src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=300&q=80" alt="Woven Basket">
-                <h3>Bamboo Woven Basket</h3>
-                <p>₹450</p>
-                <button class="buy-btn" onclick="openCheckout('Bamboo Woven Basket', 450)">Buy Now</button>
+    </main>
+
+    <div id="cart-overlay" class="overlay hidden">
+        <div class="cart-sidebar">
+            <button id="close-cart" class="close-btn">&times;</button>
+            <h2>Your Cart</h2>
+            <div id="cart-items" class="cart-items"></div>
+            <div class="cart-footer">
+                <h3>Total: ₹<span id="cart-total">0</span></h3>
+                <button id="checkout-btn" class="btn primary-btn" disabled>Proceed to Checkout</button>
             </div>
         </div>
-    </section>
+    </div>
 
-    <section id="checkout" class="checkout-section hidden">
-        <h2>Complete Your Order</h2>
-        <p id="order-summary">You are buying: <span></span></p>
-        
-        <div class="checkout-container">
-            <form id="order-form">
-                <h3>Customer Details</h3>
-                <input type="text" id="name" placeholder="Full Name" required>
-                <input type="email" id="email" placeholder="Email Address" required>
-                <input type="tel" id="phone" placeholder="Phone Number" required>
-                <textarea id="address" placeholder="Complete Shipping Address" required></textarea>
-                
-                <button type="submit" class="submit-btn">Place Order</button>
-            </form>
+    <div id="checkout-modal" class="overlay hidden">
+        <div class="modal-content">
+            <button id="close-checkout" class="close-btn">&times;</button>
+            
+            <div id="user-details-section">
+                <h2>Shipping Details</h2>
+                <form id="checkout-form">
+                    <input type="text" id="name" placeholder="Full Name" required>
+                    <input type="email" id="email" placeholder="Email Address" required>
+                    <textarea id="address" placeholder="Shipping Address" required></textarea>
+                    <button type="submit" class="btn primary-btn">Generate Payment QR</button>
+                </form>
+            </div>
 
-            <div class="payment-details">
-                <h3>Payment</h3>
-                <p>Scan the QR code below using any UPI app (GPay, PhonePe, Paytm) to pay.</p>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=yourname@upi" alt="Payment QR Code" class="qr-code">
-                <p><strong>Note:</strong> Once paid, click "Place Order" on the left. We will verify the payment and ship your item!</p>
+            <div id="payment-section" class="hidden text-center">
+                <h2>Scan to Pay</h2>
+                <p>Exact Amount: <strong>₹<span id="pay-amount"></span></strong></p>
+                <div class="qr-container">
+                    <img id="qr-code-img" src="" alt="Payment QR Code">
+                </div>
+                <p class="instruction">Scan using PhonePe, GPay, or any UPI app.</p>
+                <button id="confirm-payment-btn" class="btn success-btn">I Have Paid</button>
+            </div>
+
+            <div id="success-section" class="hidden text-center">
+                <h2>Request Sent!</h2>
+                <p>We have received your order and payment request.</p>
+                <p class="status-badge">Status: Awaiting Seller Confirmation</p>
+                <button id="finish-btn" class="btn primary-btn">Back to Store</button>
             </div>
         </div>
-    </section>
-
-    <section id="contact" class="contact-section">
-        <h2>Contact Us</h2>
-        <div class="contact-info">
-            <div class="address-box">
-                <h3>Our Location</h3>
-                <p>Handcraft Haven Studio</p>
-                <p>Secunderabad, Telangana</p>
-                <p>India</p>
-            </div>
-            <div class="contact-box">
-                <h3>Get in Touch</h3>
-                <p>Email: hello@handcrafthaven.com</p>
-                <p>Phone: +91 98765 43210</p>
-                <p>Hours: Mon - Sat, 10 AM - 6 PM</p>
-            </div>
-        </div>
-    </section>
-
-    <footer>
-        <p>&copy; 2026 Handcraft Haven. All rights reserved.</p>
-    </footer>
+    </div>
 
     <script src="script.js"></script>
 </body>
