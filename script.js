@@ -7,28 +7,22 @@ const products = [
 ];
 
 let cart = [];
+let customerDetails = {}; 
 
-// --- 2. DOM Elements ---
-const productGrid = document.getElementById('product-grid');
-const cartCount = document.getElementById('cart-count');
-const cartItemsContainer = document.getElementById('cart-items');
-const cartTotal = document.getElementById('cart-total');
-const checkoutBtn = document.getElementById('checkout-btn');
-
-// Overlays & Sections
-const cartOverlay = document.getElementById('cart-overlay');
-const checkoutModal = document.getElementById('checkout-modal');
-const userDetailsSection = document.getElementById('user-details-section');
-const paymentSection = document.getElementById('payment-section');
-const successSection = document.getElementById('success-section');
+// --- 2. DOM Elements (Loaded after DOM is ready) ---
+let productGrid, cartCount, cartItemsContainer, cartTotal, checkoutBtn;
+let cartOverlay, checkoutModal, userDetailsSection, paymentSection, successSection;
 
 // --- 3. Render Products ---
 function renderProducts() {
+    // Clear the grid first just in case
+    productGrid.innerHTML = ''; 
+    
     products.forEach(product => {
         const card = document.createElement('div');
         card.className = 'product-card';
         card.innerHTML = `
-            <img src="${product.img}" alt="${product.name}">
+            <img src="${product.img}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/400x250?text=Image+Not+Found'">
             <h3>${product.name}</h3>
             <p class="price">₹${product.price}</p>
             <button class="btn primary-btn" onclick="addToCart(${product.id})">Add to Cart</button>
@@ -48,7 +42,12 @@ window.addToCart = function(productId) {
         cart.push({ ...product, quantity: 1 });
     }
     updateCartUI();
-    cartOverlay.classList.remove('hidden'); // Open cart on add
+    cartOverlay.classList.remove('hidden'); 
+}
+
+window.removeFromCart = function(index) {
+    cart.splice(index, 1);
+    updateCartUI();
 }
 
 function updateCartUI() {
@@ -67,7 +66,7 @@ function updateCartUI() {
             </div>
             <div>
                 <strong>₹${item.price * item.quantity}</strong>
-                <button onclick="removeFromCart(${index})" style="margin-left: 10px; color: red; border: none; background: none; cursor: pointer;">X</button>
+                <button onclick="removeFromCart(${index})" style="margin-left: 10px; color: red; border: none; background: none; cursor: pointer; font-weight: bold;">X</button>
             </div>
         `;
         cartItemsContainer.appendChild(div);
@@ -77,60 +76,82 @@ function updateCartUI() {
     checkoutBtn.disabled = cart.length === 0;
 }
 
-window.removeFromCart = function(index) {
-    cart.splice(index, 1);
-    updateCartUI();
-}
-
-// --- 5. Navigation & Modal Logic ---
-document.getElementById('cart-btn').addEventListener('click', () => cartOverlay.classList.remove('hidden'));
-document.getElementById('close-cart').addEventListener('click', () => cartOverlay.classList.add('hidden'));
-document.getElementById('close-checkout').addEventListener('click', () => checkoutModal.classList.add('hidden'));
-
-checkoutBtn.addEventListener('click', () => {
-    cartOverlay.classList.add('hidden');
-    checkoutModal.classList.remove('hidden');
-    userDetailsSection.classList.remove('hidden');
-    paymentSection.classList.add('hidden');
-    successSection.classList.add('hidden');
-});
-
-// --- 6. Checkout & QR Generation ---
-document.getElementById('checkout-form').addEventListener('submit', (e) => {
-    e.preventDefault();
+// --- 5. Initialize Everything when Page Loads ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Grab all elements
+    productGrid = document.getElementById('product-grid');
+    cartCount = document.getElementById('cart-count');
+    cartItemsContainer = document.getElementById('cart-items');
+    cartTotal = document.getElementById('cart-total');
+    checkoutBtn = document.getElementById('checkout-btn');
     
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    document.getElementById('pay-amount').innerText = total;
+    cartOverlay = document.getElementById('cart-overlay');
+    checkoutModal = document.getElementById('checkout-modal');
+    userDetailsSection = document.getElementById('user-details-section');
+    paymentSection = document.getElementById('payment-section');
+    successSection = document.getElementById('success-section');
 
-    // Generate UPI QR Code URL
-    // Format: upi://pay?pa=YOUR_UPI_ID&pn=YOUR_BUSINESS_NAME&am=AMOUNT&cu=INR
-    const upiId = "yourbusiness@ybl"; // Replace with your actual merchant UPI ID
-    const businessName = "Artisan Decor";
-    const upiString = `upi://pay?pa=${upiId}&pn=${businessName}&am=${total}&cu=INR`;
-    
-    // Using goqr.me API to generate the QR image based on the UPI string
-    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiString)}`;
-    document.getElementById('qr-code-img').src = qrApiUrl;
+    // Render the products initially
+    renderProducts();
 
-    // Transition to Payment Section
-    userDetailsSection.classList.add('hidden');
-    paymentSection.classList.remove('hidden');
+    // Event Listeners for Modals
+    document.getElementById('cart-btn').addEventListener('click', () => cartOverlay.classList.remove('hidden'));
+    document.getElementById('close-cart').addEventListener('click', () => cartOverlay.classList.add('hidden'));
+    document.getElementById('close-checkout').addEventListener('click', () => checkoutModal.classList.add('hidden'));
+
+    checkoutBtn.addEventListener('click', () => {
+        cartOverlay.classList.add('hidden');
+        checkoutModal.classList.remove('hidden');
+        userDetailsSection.classList.remove('hidden');
+        paymentSection.classList.add('hidden');
+        successSection.classList.add('hidden');
+    });
+
+    // Checkout Form Submit (Generate QR)
+    document.getElementById('checkout-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        customerDetails = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            address: document.getElementById('address').value
+        };
+        
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        document.getElementById('pay-amount').innerText = total;
+
+        const upiId = "yourbusiness@ybl"; // <-- UPDATE THIS
+        const businessName = "Artisan Decor";
+        const upiString = `upi://pay?pa=${upiId}&pn=${businessName}&am=${total}&cu=INR`;
+        
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiString)}`;
+        document.getElementById('qr-code-img').src = qrApiUrl;
+
+        userDetailsSection.classList.add('hidden');
+        paymentSection.classList.remove('hidden');
+    });
+
+    // WhatsApp Confirmation
+    document.getElementById('confirm-payment-btn').addEventListener('click', () => {
+        const orderSummary = cart.map(item => `${item.name} (x${item.quantity}) - ₹${item.price * item.quantity}`).join('\n');
+        const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        const whatsappMessage = `*🎉 NEW ORDER PLACED 🎉*\n\n*Customer Details:*\nName: ${customerDetails.name}\nEmail: ${customerDetails.email}\nAddress: ${customerDetails.address}\n\n*Order Summary:*\n${orderSummary}\n\n*Total Amount Paid:* ₹${totalAmount}\n\n_Note: I have completed the payment via the UPI QR code._`;
+
+        const myPhoneNumber = "919876543210"; // <-- UPDATE THIS WITH YOUR 10 DIGIT NUMBER
+        
+        const whatsappUrl = `https://wa.me/${myPhoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+        window.open(whatsappUrl, '_blank');
+
+        paymentSection.classList.add('hidden');
+        successSection.classList.remove('hidden');
+        
+        cart = [];
+        updateCartUI();
+    });
+
+    // Finish button
+    document.getElementById('finish-btn').addEventListener('click', () => {
+        checkoutModal.classList.add('hidden');
+    });
 });
-
-// --- 7. Order Confirmation Simulation ---
-document.getElementById('confirm-payment-btn').addEventListener('click', () => {
-    // Transition to Success Section
-    paymentSection.classList.add('hidden');
-    successSection.classList.remove('hidden');
-    
-    // Clear the cart
-    cart = [];
-    updateCartUI();
-});
-
-document.getElementById('finish-btn').addEventListener('click', () => {
-    checkoutModal.classList.add('hidden');
-});
-
-// Init
-renderProducts();
